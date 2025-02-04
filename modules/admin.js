@@ -91,16 +91,27 @@ router.post('/createTeam', async (req, res) => {
             },
           },
         },
+      },
+      select: {
+        id: true,
+        rounds: {
+          select: {
+            id: true
+          },
+          orderBy: {
+            roundNo: 'asc'
+          },
+        },
       }
     });
 
     console.log(team);
-    // await prisma.powerups.createMany({
-    //   data: getPowerups(team.id, team.rounds[0].id)
-    // })
+    await prisma.powerups.createMany({
+      data: getPowerups(team.id, team["rounds"][0].id)
+    });
   });
 
-  successJson(res, {username, token});
+  successJson(res, {username, password});
 });
 
 router.get('/users', async (req, res) => {
