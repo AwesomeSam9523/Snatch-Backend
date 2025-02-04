@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL")
+}
+
+model Team {
+  id           String         @id @default(uuid())
+  name         String
+  avatar       String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  eliminated   Boolean        @default(false)
+  teamLogin    TeamLogins?    @relation(fields: [id], references: [teamId])
+  members      TeamMember[]
+  rounds       Round[]
+  powerups     PowerUp[]      @relation("TeamPowerUps")
+  PowerupUsage PowerupUsage[]
+}
+
+model TeamLogins {
+  teamId      String   @id @default(uuid())
+  username    String
+  password    String   @unique
+  token       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById String
+  Team        Team?
+  createdBy   User     @relation(fields: [createdById], references: [id])
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  name      String
+  teamId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Team      Team     @relation(fields: [teamId], references: [id])
+}
+
+model Round {
+  id           String         @id @default(uuid())
+  teamId       String
+  roundNo      Int            @default(1)
+  score        Int            @default(0)
+  pool         Int
+  powerups     PowerUp[]
+  Team         Team           @relation(fields: [teamId], references: [id])
+  PowerupUsage PowerupUsage[]
+}
+
+model PowerUp {
+  id           String        @id @default(uuid())
+  name         String
+  used         Boolean       @default(false)
+  available    Boolean       @default(false)
+  expiresAt    DateTime?
+  teamId       String
+  belongsTo    Team          @relation("TeamPowerUps", fields: [teamId], references: [id])
+  roundId      String
+  round        Round         @relation(fields: [roundId], references: [id])
+  powerupUsage PowerupUsage?
+}
+
+model PowerupUsage {
+  id           String   @id @default(uuid())
+  powerupId    String   @unique
+  usedOnTeamId String
+  roundId      String
+  usedAt       DateTime @default(now())
+  powerup      PowerUp  @relation(fields: [powerupId], references: [id])
+  usedOn       Team     @relation(fields: [usedOnTeamId], references: [id])
+  round        Round    @relation(fields: [roundId], references: [id])
+}
+
+model User {
+  id             String       @id @default(uuid())
+  username       String
+  password       String
+  token          String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  clearanceLevel Int          @default(0)
+  createdById    String?
+  TeamLogins     TeamLogins[]
+  createdBy      User?        @relation("CreatedBy", fields: [createdById], references: [id])
+  User           User[]       @relation("CreatedBy")
+}
