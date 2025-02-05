@@ -3,10 +3,10 @@ import cors from 'cors';
 import winston from "winston";
 import bodyParser from "body-parser";
 
-import {loginByUsername, loginByToken, generateCredentials, generateToken, successJson} from './utils/helper.js';
+import {loginByUsername, loginByToken, successJson} from './utils/helper.js';
 
 // Modules
-import adminManager from './modules/admin.js';
+import adminManager from './modules/admin/index.js';
 import leaderboardManager from './modules/leaderboard.js';
 import powerupsManager from './modules/powerups.js';
 

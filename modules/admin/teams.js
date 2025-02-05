@@ -1,11 +1,10 @@
-import {checkClearance, errorJson, generateCredentials, generateToken, successJson} from "../utils/helper.js";
-import prisma from "../utils/database.js";
-import {Router} from "express";
-import {errorCodes} from "../utils/errorCodes.js";
-
-const BRACKET_SIZE = 4;
+import {checkClearance, errorJson, generateCredentials, generateToken, successJson} from "../../utils/helper.js";
+import prisma from "../../utils/database.js";
+import {Router} from 'express';
+import {errorCodes} from "../../utils/errorCodes.js";
 
 const router = Router();
+const BRACKET_SIZE = 4;
 
 const getPowerups = (teamId, roundId) => {
   return [
@@ -16,33 +15,7 @@ const getPowerups = (teamId, roundId) => {
   ]
 }
 
-router.post('/createUser', async (req, res) => {
-  if (!checkClearance(req, res, 2))
-    return;
-
-  const {username, clearanceLevel} = req.body;
-  if (!username || !clearanceLevel)
-    return res.sendStatus(400);
-
-  if (req.user.clearanceLevel <= clearanceLevel)
-    return res.sendStatus(403);
-
-  const password = generateCredentials();
-  const token = generateToken(username, clearanceLevel);
-  await prisma.user.create({
-    data: {
-      username,
-      password,
-      token,
-      clearanceLevel,
-      createdById: req.user.id
-    }
-  });
-
-  successJson(res, {username, token});
-});
-
-router.post('/createTeam', async (req, res) => {
+router.post('/create', async (req, res) => {
   if (!checkClearance(req, res, 2))
     return;
 
@@ -117,7 +90,7 @@ router.post('/createTeam', async (req, res) => {
   successJson(res, {username, password});
 });
 
-router.post('/deleteTeam', async (req, res) => {
+router.post('/delete', async (req, res) => {
   if (!checkClearance(req, res, 2))
     return;
 
@@ -181,26 +154,6 @@ router.post('/uneliminate', async (req, res) => {
   } catch (e) {
     errorJson(res, "Team not found.", errorCodes.TEAM_NOT_FOUND);
   }
-});
-
-router.get('/users', async (req, res) => {
-  if (!checkClearance(req, res, 1))
-    return;
-
-  const users = await prisma.user.findMany({
-    select: {
-      username: true,
-      clearanceLevel: true,
-      createdAt: true,
-      createdBy: {
-        select: {
-          username: true,
-          clearanceLevel: true
-        }
-      }
-    }
-  });
-  successJson(res, users);
 });
 
 export default router;
