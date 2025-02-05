@@ -4,7 +4,6 @@ import {Router} from "express";
 
 const router = Router();
 
-
 router.post('/create', async (req, res) => {
   if (!checkClearance(req, res, 2))
     return;
@@ -31,8 +30,7 @@ router.post('/create', async (req, res) => {
   successJson(res, {username, token});
 });
 
-
-router.get('/', async (req, res) => {
+router.get('/all', async (req, res) => {
   if (!checkClearance(req, res, 1))
     return;
 

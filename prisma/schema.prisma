@@ -18,7 +18,7 @@ model Team {
   members      TeamMember[]
   rounds       Round[]
   powerups     PowerUp[]      @relation("TeamPowerUps")
-  PowerupUsage PowerupUsage[]
+  powerupUsage PowerupUsage[]
 }
 
 model TeamLogins {
@@ -29,7 +29,7 @@ model TeamLogins {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   createdById String
-  Team        Team?
+  team        Team?
   createdBy   User     @relation(fields: [createdById], references: [id])
 }
 
