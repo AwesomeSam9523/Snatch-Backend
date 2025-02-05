@@ -65,6 +65,10 @@ app.use(async (req, res, next) => {
   if (token) {
     req.user = await loginByToken(token);
   }
+
+  if (!req.user)
+    return res.sendStatus(401);
+
   next();
 });
 

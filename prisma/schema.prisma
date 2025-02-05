@@ -39,7 +39,7 @@ model TeamMember {
   teamId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Team      Team     @relation(fields: [teamId], references: [id])
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
 }
 
 model Round {
@@ -49,8 +49,8 @@ model Round {
   score        Int            @default(0)
   pool         Int
   powerups     PowerUp[]
-  Team         Team           @relation(fields: [teamId], references: [id])
-  PowerupUsage PowerupUsage[]
+  team         Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  powerupUsage PowerupUsage[]
 }
 
 model PowerUp {
@@ -60,7 +60,7 @@ model PowerUp {
   available    Boolean       @default(false)
   expiresAt    DateTime?
   teamId       String
-  belongsTo    Team          @relation("TeamPowerUps", fields: [teamId], references: [id])
+  belongsTo    Team          @relation("TeamPowerUps", fields: [teamId], references: [id], onDelete: Cascade)
   roundId      String
   round        Round         @relation(fields: [roundId], references: [id])
   powerupUsage PowerupUsage?
@@ -72,7 +72,7 @@ model PowerupUsage {
   usedOnTeamId String
   roundId      String
   usedAt       DateTime @default(now())
-  powerup      PowerUp  @relation(fields: [powerupId], references: [id])
+  powerup      PowerUp  @relation(fields: [powerupId], references: [id], onDelete: Cascade)
   usedOn       Team     @relation(fields: [usedOnTeamId], references: [id])
   round        Round    @relation(fields: [roundId], references: [id])
 }
@@ -86,7 +86,7 @@ model User {
   updatedAt      DateTime     @updatedAt
   clearanceLevel Int          @default(0)
   createdById    String?
-  TeamLogins     TeamLogins[]
+  teamLogins     TeamLogins[]
   createdBy      User?        @relation("CreatedBy", fields: [createdById], references: [id])
   User           User[]       @relation("CreatedBy")
 }
