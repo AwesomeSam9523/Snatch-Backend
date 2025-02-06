@@ -24,9 +24,9 @@ logger.add(new winston.transports.Console({
 }));
 
 const app = express();
-
+app.use(express.static('public'))
 app.use((req, res, next) => {
-  logger.debug(`${req.method}: ${req.url}`);
+  logger.info(`${req.method}: ${req.url}`);
   next();
 });
 
@@ -55,7 +55,16 @@ app.post('/login', async (req, res) => {
   successJson(res, user);
 });
 
+const allowed_routes = [
+  '/avatars/.*.svg',
+]
+
 app.use(async (req, res, next) => {
+  for (let route of allowed_routes) {
+    if (req.path.match(route))
+      return next();
+  }
+
   if (!req.headers.authorization)
     return res.sendStatus(401);
 

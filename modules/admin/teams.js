@@ -156,4 +156,23 @@ router.post('/uneliminate', async (req, res) => {
   }
 });
 
+router.get('/all', async (req, res) => {
+  if (!checkClearance(req, res, 2))
+    return res.sendStatus(401);
+
+  const data = await prisma.$queryRaw`
+    SELECT r."pool", JSON_AGG(JSON_BUILD_OBJECT(
+                            'name', t."name",
+                            'avatar', t.avatar,
+                            'eliminated', t."eliminated"
+                            )) AS teams
+    FROM "Round" r
+    JOIN "Team" t ON r."teamId" = t."id"
+    GROUP BY r."pool"
+    ORDER BY r."pool";
+  `;
+
+  successJson(res, data);
+});
+
 export default router;
