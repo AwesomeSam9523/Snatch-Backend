@@ -1,7 +1,6 @@
-import {checkClearance, errorJson, generateCredentials, generateToken, successJson} from "../../utils/helper.js";
+import {successJson} from "../../utils/helper.js";
 import prisma from "../../utils/database.js";
 import {Router} from 'express';
-import {errorCodes} from "../../utils/errorCodes.js";
 
 const router = Router();
 

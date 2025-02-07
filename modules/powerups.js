@@ -30,4 +30,12 @@ router.post('/', async (req, res) => {
   successJson(res, data);
 });
 
+router.post('/use', async (req, res) => {
+  const {powerUp, id} = req.body;
+  if (!powerUp || !id)
+    return res.sendStatus(400);
+
+
+});
+
 export default router;

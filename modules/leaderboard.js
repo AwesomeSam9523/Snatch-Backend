@@ -15,6 +15,7 @@ router.post('/', async (req, res) => {
       score: true,
       team: {
         select: {
+          id: true,
           name: true,
           avatar: true,
           eliminated: true,

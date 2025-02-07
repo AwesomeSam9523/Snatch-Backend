@@ -16,7 +16,7 @@ router.post('/create', async (req, res) => {
     return res.sendStatus(403);
 
   const password = generateCredentials();
-  const token = generateToken(username, clearanceLevel);
+  const token = generateToken(username, password, clearanceLevel);
   await prisma.user.create({
     data: {
       username,

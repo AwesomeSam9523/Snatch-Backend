@@ -3,7 +3,7 @@ import cors from 'cors';
 import winston from "winston";
 import bodyParser from "body-parser";
 
-import {loginByUsername, loginByToken, successJson} from './utils/helper.js';
+import {loginByUsername, loginByToken, successJson, loginByTeamToken} from './utils/helper.js';
 
 // Modules
 import adminManager from './modules/admin/index.js';
@@ -72,7 +72,7 @@ app.use(async (req, res, next) => {
   req.user = null;
 
   if (token) {
-    req.user = await loginByToken(token);
+    req.user = await loginByToken(token) || await loginByTeamToken(token);
   }
 
   if (!req.user)

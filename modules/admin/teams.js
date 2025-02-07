@@ -39,7 +39,7 @@ router.post('/create', async (req, res) => {
     members.pop();
 
   const password = generateCredentials();
-  const token = generateToken(username, 0);
+  const token = generateToken(username, password, 0);
   const poolCount = await prisma.team.count();
   const pool = Math.ceil( (poolCount === 0 ? 1 : poolCount) / BRACKET_SIZE);
 

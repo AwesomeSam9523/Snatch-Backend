@@ -21,7 +21,7 @@ async function loginByUsername(username, password) {
   try {
     verifyToken(user.token);
   } catch (e) {
-    user.token = generateToken(user.username, user.clearanceLevel);
+    user.token = generateToken(user.username, user.password, user.clearanceLevel);
   }
 
   await prisma.user.update({
@@ -57,13 +57,33 @@ async function loginByToken(token) {
   });
 }
 
+async function loginByTeamToken(token) {
+  try {
+    verifyToken(token);
+  } catch {
+    return null;
+  }
+
+  return prisma.teamLogins.findFirst({
+    where: {
+      token
+    },
+    select: {
+      id: true,
+      username: true,
+      token: true,
+      clearanceLevel: true
+    }
+  });
+}
+
 function generateCredentials() {
   return Math.random().toString(36).substring(2, 8);
 }
 
-function generateToken(username, clearanceLevel) {
+function generateToken(username, password, clearanceLevel) {
   return jwt.sign(
-    {username, clearanceLevel},
+    {username, password, clearanceLevel},
     process.env.JWT_SECRET,
     {expiresIn: '1d'}
   );
@@ -102,10 +122,11 @@ function checkClearance(req, res, match) {
 export {
   loginByUsername,
   loginByToken,
+  loginByTeamToken,
   generateCredentials,
   generateToken,
   verifyToken,
   successJson,
   errorJson,
-  checkClearance
+  checkClearance,
 };
