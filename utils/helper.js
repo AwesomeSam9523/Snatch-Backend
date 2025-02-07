@@ -64,8 +64,11 @@ async function loginByToken(token) {
   try {
     verifyToken(token);
   } catch {
+    console.log('Invalid token');
     return null;
   }
+
+  console.log(token);
 
   return prisma.user.findFirst({
     where: {

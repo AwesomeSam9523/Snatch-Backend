@@ -89,6 +89,7 @@ app.use(async (req, res, next) => {
 
   if (token) {
     req.user = await loginByToken(token) || await loginByTeamToken(token);
+    console.log(req.user);
   }
 
   if (!req.user)
