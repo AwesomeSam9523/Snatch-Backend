@@ -1,7 +1,8 @@
 {
   "scripts": {
     "dev": "nodemon app.js",
-    "start": "node app.js"
+    "start": "node app.js",
+    "postinstall": "prisma migrate dev && prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.3.0",
