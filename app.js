@@ -48,8 +48,6 @@ app.use((req, res, next) => {
 
 app.use(cors({
   origin: "*",
-  optionsSuccessStatus: 200,
-  credentials: true,
 }));
 app.use(bodyParser.json());
 
