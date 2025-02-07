@@ -15,26 +15,49 @@ async function loginByUsername(username, password) {
     }
   });
 
-  if (!user)
-    return null;
-
-  try {
-    verifyToken(user.token);
-  } catch (e) {
-    user.token = generateToken(user.username, user.password, user.clearanceLevel);
-  }
-
-  await prisma.user.update({
-    data: {
-      token: user.token
-    },
+  const team = await prisma.teamLogins.findFirst({
     where: {
-      id: user.id
+      username,
+      password
+    },
+    select: {
+      teamId: true,
+      username: true,
+      token: true,
     }
   });
 
-  delete user["id"];
-  return user;
+  if (!user && !team)
+    return null;
+
+  const data = user || team;
+
+  try {
+    verifyToken(data.token);
+  } catch (e) {
+    data.token = generateToken(data.username, data.password, data.clearanceLevel);
+    if (user) {
+      await prisma.user.update({
+        data: {
+          token: data.token
+        },
+        where: {
+          id: data.id
+        }
+      });
+    } else {
+      await prisma.teamLogins.update({
+        data: {
+          token: data.token
+        },
+        where: {
+          id: data.id
+        }
+      });
+    }
+  }
+
+  return data;
 }
 
 async function loginByToken(token) {
@@ -51,6 +74,7 @@ async function loginByToken(token) {
     select: {
       id: true,
       username: true,
+      password: true,
       token: true,
       clearanceLevel: true
     }
@@ -64,17 +88,22 @@ async function loginByTeamToken(token) {
     return null;
   }
 
-  return prisma.teamLogins.findFirst({
+  const data = prisma.teamLogins.findFirst({
     where: {
       token
     },
     select: {
-      id: true,
+      teamId: true,
       username: true,
+      password: true,
       token: true,
-      clearanceLevel: true
     }
   });
+
+  data["id"] = data["teamId"];
+  data["clearanceLevel"] = 0;
+  delete data["teamId"];
+  return data;
 }
 
 function generateCredentials() {

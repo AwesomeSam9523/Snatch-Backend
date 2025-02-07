@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import winston from "winston";
 import bodyParser from "body-parser";
+import { WebSocketServer } from 'ws';
 
 import {loginByUsername, loginByToken, successJson, loginByTeamToken} from './utils/helper.js';
 
@@ -22,6 +23,21 @@ const logger = winston.createLogger({
 logger.add(new winston.transports.Console({
   format: winston.format.simple(),
 }));
+
+const wss = new WebSocketServer({
+  port: 9000,
+  perMessageDeflate: {
+    zlibDeflateOptions: {
+      // See zlib defaults.
+      chunkSize: 1024,
+      memLevel: 7,
+      level: 3
+    },
+    zlibInflateOptions: {
+      chunkSize: 10 * 1024
+    },
+  }
+});
 
 const app = express();
 app.use(express.static('public'))
@@ -85,6 +101,23 @@ app.use('/admin', adminManager);
 app.use('/leaderboard', leaderboardManager);
 app.use('/powerups', powerupsManager);
 
+wss.on('connection', function connection(ws, request, client) {
+  // console.log('connected', ws);
+  ws.on('error', console.error);
+
+  ws.on('message', function message(msg) {
+    let data;
+    try {
+      data = JSON.parse(msg);
+    } catch (e) {
+      console.log(e)
+      console.error('Invalid JSON %s', msg);
+      return;
+    }
+
+    console.log('received: %s', data);
+  });
+});
 
 const PORT = process.env.PORT || 3000;
 if (!process.env.VERCEL) {
