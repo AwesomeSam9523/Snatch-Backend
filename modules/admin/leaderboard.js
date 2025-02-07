@@ -6,8 +6,6 @@ const router = Router();
 
 router.post('/', async (req, res) => {
   const {pool, roundNo} = req.body;
-  // TODO
-  console.log(res.body);
 
   if (!pool) {
     return res.sendStatus(400);
@@ -39,6 +37,7 @@ router.post('/', async (req, res) => {
     },
     where: {
       pool,
+      roundNo,
     },
     orderBy: {
       score: 'desc'

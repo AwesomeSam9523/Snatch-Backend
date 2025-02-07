@@ -140,6 +140,11 @@ function checkClearance(req, res, match) {
   }
 
   const {clearanceLevel} = req.user;
+  if (!clearanceLevel) {
+    res.sendStatus(403);
+    return false;
+  }
+
   if (clearanceLevel < match) {
     res.sendStatus(403);
     return false;
