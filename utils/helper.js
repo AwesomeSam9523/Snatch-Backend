@@ -63,7 +63,8 @@ async function loginByUsername(username, password) {
 async function loginByToken(token) {
   try {
     verifyToken(token);
-  } catch {
+  } catch (e) {
+    console.error(e);
     console.log('Invalid token');
     return null;
   }
