@@ -2,6 +2,8 @@ import prisma from "../utils/database.js";
 import {Router} from "express";
 import {errorJson, successJson} from "../utils/helper.js";
 import {errorCodes} from "../utils/errorCodes.js";
+import EventEmitter from "node:events";
+const eventEmitter = new EventEmitter();
 
 const router = Router();
 
@@ -264,6 +266,9 @@ router.post('/use', async (req, res) => {
         expiresAt,
       },
     });
+    if (powerup.name === 'freeze') {
+      eventEmitter.emit('powerUpUse', currentTeam.teamId, usedOnId, roundData.pool);
+    }
     successJson(res, {});
   }
 });

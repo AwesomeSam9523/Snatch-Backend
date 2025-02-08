@@ -2,7 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import winston from "winston";
 import bodyParser from "body-parser";
-import { WebSocketServer } from 'ws';
+import {WebSocketServer} from 'ws';
+import EventEmitter from 'node:events';
+
+const eventEmitter = new EventEmitter();
 
 import {loginByUsername, loginByToken, successJson, loginByTeamToken} from './utils/helper.js';
 
@@ -97,6 +100,21 @@ app.use(async (req, res, next) => {
 app.use('/admin', adminManager);
 app.use('/leaderboard', leaderboardManager);
 app.use('/powerups', powerupsManager);
+
+eventEmitter.on('powerUpUse', (usedBy, usedOn, pool) => {
+  console.log(usedBy, usedOn, pool);
+  // broadcast this to all websockets
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify({
+        type: 'powerUpUse',
+        data: {
+          usedBy, usedOn, pool
+        }
+      }));
+    }
+  });
+});
 
 wss.on('connection', function connection(ws, request, client) {
   // console.log('connected', ws);
