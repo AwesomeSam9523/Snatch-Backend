@@ -264,6 +264,9 @@ router.post('/use', async (req, res) => {
         usedOnTeamId: usedOnId,
         powerupId: powerup.id,
         expiresAt,
+        connect: {
+          powerup: powerup.id,
+        }
       },
     });
     if (powerup.name === 'freeze') {
