@@ -11,6 +11,7 @@ model Team {
   id           String         @id @default(uuid())
   name         String
   avatar       String
+  email        String?
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   eliminated   Boolean        @default(false)

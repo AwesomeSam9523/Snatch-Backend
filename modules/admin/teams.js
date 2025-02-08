@@ -19,8 +19,8 @@ router.post('/create', async (req, res) => {
   if (!checkClearance(req, res, 2))
     return;
 
-  const {username, member1, member2, member3, member4} = req.body;
-  if (!username || !member1 || !member2)
+  const {username, member1, member2, member3, member4, email} = req.body;
+  if (!username || !email || !member1 || !member2)
     return res.sendStatus(400);
 
   const totalTeams = await prisma.team.count();
@@ -48,6 +48,7 @@ router.post('/create', async (req, res) => {
       data: {
         name: username,
         avatar: `/avatars/${totalTeams + 1}.svg`,
+        email: email,
         members: {
           create: members
         },
