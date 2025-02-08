@@ -208,12 +208,6 @@ router.post('/use', async (req, res) => {
   });
   console.log('usedOnPowerup', usedOnPowerup);
 
-  if (usedOnPowerup?.powerup?.name === 'shield') {
-    await prisma.powerUp.update({
-
-    })
-  }
-
   if (usedOnPowerup) {
     return errorJson(res, 'Another team is already under attack', errorCodes.ANOTHER_POWERUP_ACTIVE);
   }
@@ -221,6 +215,7 @@ router.post('/use', async (req, res) => {
   let expiresAt = new Date();
   let now = new Date();
   let usedOnId = id;
+  let newPowerup = null;
 
   switch (powerup.name) {
     case 'shield':
@@ -228,12 +223,49 @@ router.post('/use', async (req, res) => {
       usedOnId = currentTeam.teamId;
       break;
     case 'rebound':
-      expiresAt = new Date(now.getTime() + 5 * 60 * 1000);
+      expiresAt = new Date(now.getTime() + 10 * 60 * 1000);
       usedOnId = currentTeam.teamId;
+      break;
+    case 'freeze':
+      expiresAt = new Date(now.getTime() + 10 * 60 * 1000);
+      break;
+    case 'wildcard':
+      newPowerup = req.body.newPowerup;
       break;
   }
 
-  successJson(res, powerup);
+  await prisma.powerUp.update({
+    where: {
+      id: powerup.id,
+    },
+    data: {
+      used: true,
+      expiresAt,
+    },
+  });
+
+  if (powerup.name === 'wildcard') {
+    const newPowerup = await prisma.powerUp.create({
+      data: {
+        name: newPowerup,
+        available: true,
+        used: false,
+        expiresAt: null,
+        roundId: round.id,
+        teamId: currentTeam.teamId,
+      },
+    });
+    successJson(res, {});
+  } else {
+    await prisma.powerupUsage.create({
+      data: {
+        usedOnTeamId: usedOnId,
+        powerupId: powerup.id,
+        expiresAt,
+      },
+    });
+    successJson(res, {});
+  }
 });
 
 export default router;
