@@ -4,8 +4,23 @@ import {successJson} from "../utils/helper.js";
 
 const router = Router();
 
-router.post('/', async (req, res) => {
-  const {roundNo, pool} = req.body;
+router.get('/', async (req, res) => {
+  const {teamId} = req.user;
+  if (!teamId) {
+    return res.sendStatus(401);
+  }
+
+  const preData = await prisma.round.findFirst({
+    select: {
+      roundNo: true,
+      pool: true,
+    },
+    where: {
+      teamId
+    },
+  });
+
+  const {roundNo, pool} = preData;
   if (!roundNo || !pool) {
     return res.sendStatus(400);
   }
