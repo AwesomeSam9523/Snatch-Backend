@@ -5,8 +5,23 @@ import {errorCodes} from "../utils/errorCodes.js";
 
 const router = Router();
 
-router.post('/', async (req, res) => {
-  const {teamId, roundNo} = req.body;
+router.get('/', async (req, res) => {
+  const {teamId} = req.user;
+  if (!teamId) {
+    return res.sendStatus(401);
+  }
+
+  const preData = await prisma.round.findFirst({
+    select: {
+      roundNo: true,
+      pool: true,
+    },
+    where: {
+      teamId
+    },
+  });
+
+  const {roundNo} = preData;
   if (!teamId || !roundNo)
     return res.sendStatus(400);
 
@@ -193,13 +208,10 @@ router.post('/use', async (req, res) => {
   });
   console.log('usedOnPowerup', usedOnPowerup);
 
-  if (usedOnPowerup) {
-    switch (usedOnPowerup.powerup.name) {
-      case 'rebound':
+  if (usedOnPowerup?.powerup?.name === 'shield') {
+    await prisma.powerUp.update({
 
-      case 'shield':
-
-    }
+    })
   }
 
   if (usedOnPowerup) {
