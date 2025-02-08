@@ -55,6 +55,7 @@ router.post('/use', async (req, res) => {
     },
   });
 
+  // check if team is present and not eliminated
   if (!currentTeam) {
     return res.sendStatus(401);
   }
@@ -63,6 +64,7 @@ router.post('/use', async (req, res) => {
     errorJson(res, 'Team is eliminated', errorCodes.TEAM_ELIMINATED);
   }
 
+  // get the round
   const lastRound = currentTeam.team.rounds.length;
   const round = currentTeam.team.rounds[lastRound - 1];
 
@@ -78,7 +80,7 @@ router.post('/use', async (req, res) => {
     },
   });
 
-  console.log(roundData);
+  console.log('roundData', roundData);
 
   const usedOnTeam = await prisma.team.findFirst({
     where: {
@@ -112,6 +114,7 @@ router.post('/use', async (req, res) => {
     },
   });
 
+  // check if opposite team exists and is in same pool
   if (!usedOnTeam) {
     return errorJson(res, 'Team to use on not found', errorCodes.TEAM_NOT_FOUND);
   }
@@ -120,7 +123,7 @@ router.post('/use', async (req, res) => {
     return errorJson(res, 'Team to use on not found', errorCodes.TEAM_NOT_FOUND);
   }
 
-  console.log(usedOnTeam);
+  console.log('usedOnTeam', usedOnTeam);
 
   const powerup = await prisma.powerUp.findFirst({
     where: {
@@ -137,8 +140,9 @@ router.post('/use', async (req, res) => {
       powerupUsage: true,
     }
   });
-  console.log(powerup);
+  console.log('powerup', powerup);
 
+  // check if powerup is available and not used
   if (!powerup) {
     return errorJson(res, 'Powerup not found', errorCodes.POWERUP_NOT_FOUND);
   }
@@ -149,6 +153,57 @@ router.post('/use', async (req, res) => {
 
   if (powerup.used) {
     return errorJson(res, 'Powerup already used', errorCodes.POWERUP_ALREADY_USED);
+  }
+
+  // check if team is not using any other powerup at that time
+  const allPowerups = await prisma.powerUp.findMany({
+    where: {
+      teamId: currentTeam.teamId,
+    },
+    select: {
+      id: true,
+      name: true,
+      available: true,
+      used: true,
+      expiresAt: true,
+      powerupUsage: true,
+    }
+  });
+
+  for (const p of allPowerups) {
+    if (p.used && p.expiresAt > new Date()) {
+      return errorJson(res, 'Another powerup is active', errorCodes.ANOTHER_POWERUP_ACTIVE);
+    }
+  }
+
+  // check if other team is being attacked
+  const usedOnPowerup = await prisma.powerupUsage.findFirst({
+    where: {
+      usedOnTeamId: usedOnTeam.id,
+      powerup: {
+        expiresAt: {
+          gte: new Date(),
+        },
+      },
+    },
+    select: {
+      id: true,
+      powerup: true,
+    }
+  });
+  console.log('usedOnPowerup', usedOnPowerup);
+
+  if (usedOnPowerup) {
+    switch (usedOnPowerup.powerup.name) {
+      case 'rebound':
+
+      case 'shield':
+
+    }
+  }
+
+  if (usedOnPowerup) {
+    return errorJson(res, 'Another team is already under attack', errorCodes.ANOTHER_POWERUP_ACTIVE);
   }
 
   let expiresAt = new Date();
